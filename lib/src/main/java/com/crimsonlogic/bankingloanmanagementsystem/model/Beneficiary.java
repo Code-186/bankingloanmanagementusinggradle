@@ -1,78 +1,39 @@
 package com.crimsonlogic.bankingloanmanagementsystem.model;
 
-import java.util.Objects;
+import java.io.Serializable;
 
-public class Beneficiary {
+public class Beneficiary implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private int beneficiaryId;
+    private String beneficiaryId;
     private String beneficiaryName;
-    private long accountNumber;
+    private String beneficiaryAccountNumber;
     private String bankName;
+    private String customerId;
 
-    public Beneficiary() {
-    }
+    public Beneficiary() {}
 
-    public Beneficiary(int beneficiaryId,
-                       String beneficiaryName,
-                       long accountNumber,
-                       String bankName) {
-
+    public Beneficiary(String beneficiaryId, String beneficiaryName, String beneficiaryAccountNumber, 
+                       String bankName, String customerId) {
         this.beneficiaryId = beneficiaryId;
         this.beneficiaryName = beneficiaryName;
-        this.accountNumber = accountNumber;
+        this.beneficiaryAccountNumber = beneficiaryAccountNumber;
         this.bankName = bankName;
+        this.customerId = customerId;
     }
 
-    public int getBeneficiaryId() {
-        return beneficiaryId;
-    }
+    public String getBeneficiaryId() { return beneficiaryId; }
+    public void setBeneficiaryId(String beneficiaryId) { this.beneficiaryId = beneficiaryId; }
 
-    public void setBeneficiaryId(int beneficiaryId) {
-        this.beneficiaryId = beneficiaryId;
-    }
+    public String getBeneficiaryName() { return beneficiaryName; }
+    public void setBeneficiaryName(String beneficiaryName) { this.beneficiaryName = beneficiaryName; }
 
-    public String getBeneficiaryName() {
-        return beneficiaryName;
-    }
+    public String getBeneficiaryAccountNumber() { return beneficiaryAccountNumber; }
+    public void setBeneficiaryAccountNumber(String beneficiaryAccountNumber) { this.beneficiaryAccountNumber = beneficiaryAccountNumber; }
 
-    public void setBeneficiaryName(String beneficiaryName) {
-        this.beneficiaryName = beneficiaryName;
-    }
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public long getAccountNumber() {
-        return accountNumber;
-    }
-
-    public void setAccountNumber(long accountNumber) {
-        this.accountNumber = accountNumber;
-    }
-
-    public String getBankName() {
-        return bankName;
-    }
-
-    public void setBankName(String bankName) {
-        this.bankName = bankName;
-    }
-
-    @Override
-    public String toString() {
-        return "Beneficiary [beneficiaryId=" + beneficiaryId
-                + ", beneficiaryName=" + beneficiaryName
-                + ", accountNumber=" + accountNumber
-                + ", bankName=" + bankName + "]";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Beneficiary that = (Beneficiary) o;
-        return beneficiaryId == that.beneficiaryId && accountNumber == that.accountNumber && Objects.equals(beneficiaryName, that.beneficiaryName) && Objects.equals(bankName, that.bankName);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(beneficiaryId, beneficiaryName, accountNumber, bankName);
-    }
+    public String getCustomerId() { return customerId; }
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
 }

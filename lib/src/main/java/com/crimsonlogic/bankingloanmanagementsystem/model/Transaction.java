@@ -1,27 +1,23 @@
 package com.crimsonlogic.bankingloanmanagementsystem.model;
 
-import java.time.LocalDateTime;
-import java.util.Objects;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 
-public class Transaction {
+public class Transaction implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private int transactionId;
-    private long accountNumber;
+    private String transactionId;
+    private String accountNumber;
     private String transactionType;
-    private double amount;
+    private BigDecimal amount;
     private String status;
-    private LocalDateTime transactionDate;
+    private Timestamp transactionDate;
 
-    public Transaction() {
-    }
+    public Transaction() {}
 
-    public Transaction(int transactionId,
-                       long accountNumber,
-                       String transactionType,
-                       double amount,
-                       String status,
-                       LocalDateTime transactionDate) {
-
+    public Transaction(String transactionId, String accountNumber, String transactionType, 
+                       BigDecimal amount, String status, Timestamp transactionDate) {
         this.transactionId = transactionId;
         this.accountNumber = accountNumber;
         this.transactionType = transactionType;
@@ -30,77 +26,21 @@ public class Transaction {
         this.transactionDate = transactionDate;
     }
 
-    // getters setters
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
 
-    public int getTransactionId() {
-        return transactionId;
-    }
+    public String getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 
-    public void setTransactionId(int transactionId) {
-        this.transactionId = transactionId;
-    }
+    public String getTransactionType() { return transactionType; }
+    public void setTransactionType(String transactionType) { this.transactionType = transactionType; }
 
-    public long getAccountNumber() {
-        return accountNumber;
-    }
+    public BigDecimal getAmount() { return amount; }
+    public void setAmount(BigDecimal amount) { this.amount = amount; }
 
-    public void setAccountNumber(long accountNumber) {
-        this.accountNumber = accountNumber;
-    }
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-    public String getTransactionType() {
-        return transactionType;
-    }
-
-    public void setTransactionType(String transactionType) {
-        this.transactionType = transactionType;
-    }
-
-    public double getAmount() {
-        return amount;
-    }
-
-    public void setAmount(double amount) {
-        this.amount = amount;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public LocalDateTime getTransactionDate() {
-        return transactionDate;
-    }
-
-    public void setTransactionDate(LocalDateTime transactionDate) {
-        this.transactionDate = transactionDate;
-    }
-
-    @Override
-    public String toString() {
-
-        return "Transaction [transactionId=" + transactionId
-                + ", accountNumber=" + accountNumber
-                + ", transactionType=" + transactionType
-                + ", amount=" + amount
-                + ", status=" + status
-                + ", transactionDate=" + transactionDate + "]";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Transaction that = (Transaction) o;
-        return transactionId == that.transactionId && accountNumber == that.accountNumber && Double.compare(amount, that.amount) == 0 && Objects.equals(transactionType, that.transactionType) && Objects.equals(status, that.status) && Objects.equals(transactionDate, that.transactionDate);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(transactionId, accountNumber, transactionType, amount, status, transactionDate);
-    }
+    public Timestamp getTransactionDate() { return transactionDate; }
+    public void setTransactionDate(Timestamp transactionDate) { this.transactionDate = transactionDate; }
 }

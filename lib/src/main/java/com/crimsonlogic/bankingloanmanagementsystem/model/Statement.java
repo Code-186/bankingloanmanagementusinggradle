@@ -1,55 +1,39 @@
 package com.crimsonlogic.bankingloanmanagementsystem.model;
 
-import java.time.LocalDate;
+import java.io.Serializable;
+import java.util.List;
 
-public class Statement {
+public class Statement implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private long accountNumber;
-    private LocalDate fromDate;
-    private LocalDate toDate;
+    private String accountNumber;
+    private String customerName;
+    private String bankName;
+    private String branchId;
+    private List<Transaction> transactions;
 
-    public Statement() {
-    }
+    public Statement() {}
 
-    public Statement(long accountNumber,
-                     LocalDate fromDate,
-                     LocalDate toDate) {
-
+    public Statement(String accountNumber, String customerName, String bankName, String branchId, List<Transaction> transactions) {
         this.accountNumber = accountNumber;
-        this.fromDate = fromDate;
-        this.toDate = toDate;
+        this.customerName = customerName;
+        this.bankName = bankName;
+        this.branchId = branchId;
+        this.transactions = transactions;
     }
 
-    public long getAccountNumber() {
-        return accountNumber;
-    }
+    public String getAccountNumber() { return accountNumber; }
+    public void setAccountNumber(String accountNumber) { this.accountNumber = accountNumber; }
 
-    public void setAccountNumber(long accountNumber) {
-        this.accountNumber = accountNumber;
-    }
+    public String getCustomerName() { return customerName; }
+    public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-    public LocalDate getFromDate() {
-        return fromDate;
-    }
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public void setFromDate(LocalDate fromDate) {
-        this.fromDate = fromDate;
-    }
+    public String getBranchId() { return branchId; }
+    public void setBranchId(String branchId) { this.branchId = branchId; }
 
-    public LocalDate getToDate() {
-        return toDate;
-    }
-
-    public void setToDate(LocalDate toDate) {
-        this.toDate = toDate;
-    }
-
-    @Override
-    public String toString() {
-        return "Statement{" +
-                "accountNumber=" + accountNumber +
-                ", fromDate=" + fromDate +
-                ", toDate=" + toDate +
-                '}';
-    }
+    public List<Transaction> getTransactions() { return transactions; }
+    public void setTransactions(List<Transaction> transactions) { this.transactions = transactions; }
 }

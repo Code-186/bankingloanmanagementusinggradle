@@ -1,127 +1,50 @@
 package com.crimsonlogic.bankingloanmanagementsystem.model;
 
-import java.time.LocalDate;
-import java.util.Objects;
+import java.io.Serializable;
+import java.math.BigDecimal;
 
-public class Loan {
+public class Loan implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private int loanId;
-    private int customerId;
+    private String loanId;
+    private String customerId;
     private String loanType;
-    private double loanAmount;
-    private double interestRate;
-    private int tenureInMonths;
+    private BigDecimal loanAmount;
+    private BigDecimal interestRate;
+    private Integer tenureMonths;
     private String status;
-    private LocalDate appliedDate;
 
-    public Loan() {
-    }
+    public Loan() {}
 
-    public Loan(int loanId,
-                int customerId,
-                String loanType,
-                double loanAmount,
-                double interestRate,
-                int tenureInMonths,
-                String status,
-                LocalDate appliedDate) {
-
+    public Loan(String loanId, String customerId, String loanType, BigDecimal loanAmount, 
+                BigDecimal interestRate, Integer tenureMonths, String status) {
         this.loanId = loanId;
         this.customerId = customerId;
         this.loanType = loanType;
         this.loanAmount = loanAmount;
         this.interestRate = interestRate;
-        this.tenureInMonths = tenureInMonths;
-        this.status = status;
-        this.appliedDate = appliedDate;
-    }
-
-    // Generate getters and setters
-
-    @Override
-    public String toString() {
-        return "Loan [loanId=" + loanId
-                + ", customerId=" + customerId
-                + ", loanType=" + loanType
-                + ", loanAmount=" + loanAmount
-                + ", status=" + status + "]";
-    }
-
-    public int getLoanId() {
-        return loanId;
-    }
-
-    public void setLoanId(int loanId) {
-        this.loanId = loanId;
-    }
-
-    public int getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
-    }
-
-    public String getLoanType() {
-        return loanType;
-    }
-
-    public void setLoanType(String loanType) {
-        this.loanType = loanType;
-    }
-
-    public double getLoanAmount() {
-        return loanAmount;
-    }
-
-    public void setLoanAmount(double loanAmount) {
-        this.loanAmount = loanAmount;
-    }
-
-    public double getInterestRate() {
-        return interestRate;
-    }
-
-    public void setInterestRate(double interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    public int getTenureInMonths() {
-        return tenureInMonths;
-    }
-
-    public void setTenureInMonths(int tenureInMonths) {
-        this.tenureInMonths = tenureInMonths;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
+        this.tenureMonths = tenureMonths;
         this.status = status;
     }
 
-    public LocalDate getAppliedDate() {
-        return appliedDate;
-    }
+    public String getLoanId() { return loanId; }
+    public void setLoanId(String loanId) { this.loanId = loanId; }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Loan loan = (Loan) o;
-        return loanId == loan.loanId && customerId == loan.customerId && Double.compare(loanAmount, loan.loanAmount) == 0 && Double.compare(interestRate, loan.interestRate) == 0 && tenureInMonths == loan.tenureInMonths && Objects.equals(loanType, loan.loanType) && Objects.equals(status, loan.status) && Objects.equals(appliedDate, loan.appliedDate);
-    }
+    public String getCustomerId() { return customerId; }
+    public void setCustomerId(String customerId) { this.customerId = customerId; }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(loanId, customerId, loanType, loanAmount, interestRate, tenureInMonths, status, appliedDate);
-    }
+    public String getLoanType() { return loanType; }
+    public void setLoanType(String loanType) { this.loanType = loanType; }
 
-    public void setAppliedDate(LocalDate appliedDate) {
-        this.appliedDate = appliedDate;
-    }
+    public BigDecimal getLoanAmount() { return loanAmount; }
+    public void setLoanAmount(BigDecimal loanAmount) { this.loanAmount = loanAmount; }
 
+    public BigDecimal getInterestRate() { return interestRate; }
+    public void setInterestRate(BigDecimal interestRate) { this.interestRate = interestRate; }
+
+    public Integer getTenureMonths() { return tenureMonths; }
+    public void setTenureMonths(Integer tenureMonths) { this.tenureMonths = tenureMonths; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }

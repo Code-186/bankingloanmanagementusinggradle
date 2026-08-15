@@ -1,79 +1,31 @@
 package com.crimsonlogic.bankingloanmanagementsystem.accountimplementation;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
-
 import com.crimsonlogic.bankingloanmanagementsystem.abstractclasses.Account;
 
 public class SavingsAccount extends Account {
+    private static final long serialVersionUID = 1L;
+    private static final BigDecimal MIN_BALANCE = new BigDecimal("1000.00");
 
-    private double interestRate;
+    private BigDecimal interestRate;
 
-    public SavingsAccount(long accountNumber,
-                          double balance,
-                          LocalDate openedDate,
-                          boolean active,
-                          int customerId,
-                          double interestRate) {
+    public SavingsAccount() {
+        super();
+        setAccountType("SAVINGS");
+    }
 
-        super(accountNumber,
-                balance,
-                openedDate,
-                active,
-                customerId);
-
+    public SavingsAccount(String accountNumber, BigDecimal balance, LocalDate openingDate, 
+                          String accountStatus, String mpin, String customerId, BigDecimal interestRate) {
+        super(accountNumber, balance, openingDate, accountStatus, mpin, customerId, "SAVINGS");
         this.interestRate = interestRate;
     }
 
     @Override
-    public void withdraw(double amount) {
-
-        if(amount > getBalance()) {
-
-            System.out.println(
-                    "Insufficient Balance");
-
-            return;
-        }
-
-        if(getBalance() - amount < 1000) {
-
-            System.out.println(
-                    "Minimum balance should be maintained");
-
-            return;
-        }
-
-        setBalance(
-                getBalance() - amount);
+    public BigDecimal getMinimumBalance() {
+        return MIN_BALANCE;
     }
 
-    public double getInterestRate() {
-        return interestRate;
-    }
-
-    public void setInterestRate(double interestRate) {
-        this.interestRate = interestRate;
-    }
-
-    @Override
-    public String toString() {
-        return "SavingsAccount{" +
-                "interestRate=" + interestRate +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        SavingsAccount that = (SavingsAccount) o;
-        return Double.compare(interestRate, that.interestRate) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), interestRate);
-    }
+    public BigDecimal getInterestRate() { return interestRate; }
+    public void setInterestRate(BigDecimal interestRate) { this.interestRate = interestRate; }
 }

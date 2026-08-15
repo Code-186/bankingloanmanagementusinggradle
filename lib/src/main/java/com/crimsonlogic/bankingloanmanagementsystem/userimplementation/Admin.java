@@ -1,83 +1,31 @@
 package com.crimsonlogic.bankingloanmanagementsystem.userimplementation;
 
-import java.util.Objects;
-
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import com.crimsonlogic.bankingloanmanagementsystem.abstractclasses.User;
 
 public class Admin extends User {
+    private static final long serialVersionUID = 1L;
 
     private String role;
-    private double salary;
-    private int branchId;
+    private BigDecimal salary;
 
-    public Admin() {
-    }
+    public Admin() { super(); }
 
-    public Admin(int userId,
-                 String name,
-                 String phoneNumber,
-                 String email,
-                 String address,
-                 String role,double salary,int branchId) {
-
-        super(userId, name, phoneNumber, email, address);
-
+    public Admin(String adminId, String name, String phoneNumber, String email, String address, 
+                 String password, LocalDate dateOfBirth, String bankName, String branchId, 
+                 String status, String role, BigDecimal salary) {
+        super(adminId, name, phoneNumber, email, address, password, dateOfBirth, bankName, branchId, status);
         this.role = role;
         this.salary = salary;
-        this.branchId = branchId;
     }
 
-    public double getSalary() {
-        return salary;
-    }
+    public String getAdminId() { return getUserId(); }
+    public void setAdminId(String adminId) { setUserId(adminId); }
 
-    public void setSalary(double salary) {
-        this.salary = salary;
-    }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-    public int getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(int branchId) {
-        this.branchId = branchId;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Admin admin = (Admin) o;
-        return Double.compare(salary, admin.salary) == 0 && branchId == admin.branchId && Objects.equals(role, admin.role);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), role, salary, branchId);
-    }
-
-    @Override
-    public String toString() {
-
-        return "Admin{" +
-                "userId=" + getUserId() +
-                ", name='" + getName() + '\'' +
-                ", phoneNumber='" + getPhoneNumber() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", address='" + getAddress() + '\'' +
-                ", role='" + role + '\'' +
-                ", salary=" + salary +
-                ", branchId=" + branchId +
-                '}';
-    }
-
+    public BigDecimal getSalary() { return salary; }
+    public void setSalary(BigDecimal salary) { this.salary = salary; }
 }

@@ -1,84 +1,31 @@
 package com.crimsonlogic.bankingloanmanagementsystem.userimplementation;
 
-import java.util.Objects;
-
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import com.crimsonlogic.bankingloanmanagementsystem.abstractclasses.User;
 
 public class Employee extends User {
+    private static final long serialVersionUID = 1L;
 
     private String designation;
-    private double salary;
-    private int branchId;
+    private BigDecimal salary;
 
-    public Employee() {
-    }
+    public Employee() { super(); }
 
-    public Employee(int userId,
-                    String name,
-                    String phoneNumber,
-                    String email,
-                    String address,
-                    String designation,
-                    double salary,
-                    int branchId) {
-
-        super(userId, name, phoneNumber, email, address);
-
+    public Employee(String employeeId, String name, String phoneNumber, String email, String address, 
+                    String password, LocalDate dateOfBirth, String bankName, String branchId, 
+                    String status, String designation, BigDecimal salary) {
+        super(employeeId, name, phoneNumber, email, address, password, dateOfBirth, bankName, branchId, status);
         this.designation = designation;
         this.salary = salary;
-        this.branchId = branchId;
     }
 
-    public String getDesignation() {
-        return designation;
-    }
+    public String getEmployeeId() { return getUserId(); }
+    public void setEmployeeId(String employeeId) { setUserId(employeeId); }
 
-    public void setDesignation(String designation) {
-        this.designation = designation;
-    }
+    public String getDesignation() { return designation; }
+    public void setDesignation(String designation) { this.designation = designation; }
 
-    public double getSalary() {
-        return salary;
-    }
-
-    public void setSalary(double salary) {
-        this.salary = salary;
-    }
-
-    public int getBranchId() {
-        return branchId;
-    }
-
-    public void setBranchId(int branchId) {
-        this.branchId = branchId;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        Employee employee = (Employee) o;
-        return Double.compare(salary, employee.salary) == 0 && branchId == employee.branchId && Objects.equals(designation, employee.designation);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), designation, salary, branchId);
-    }
-
-    @Override
-    public String toString() {
-
-        return "Employee{" +
-                "userId=" + getUserId() +
-                ", name='" + getName() + '\'' +
-                ", phoneNumber='" + getPhoneNumber() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", address='" + getAddress() + '\'' +
-                ", designation='" + designation + '\'' +
-                ", salary=" + salary +
-                ", branchId=" + branchId +
-                '}';
-    }
+    public BigDecimal getSalary() { return salary; }
+    public void setSalary(BigDecimal salary) { this.salary = salary; }
 }

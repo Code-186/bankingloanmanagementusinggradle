@@ -1,66 +1,31 @@
 package com.crimsonlogic.bankingloanmanagementsystem.accountimplementation;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
-
 import com.crimsonlogic.bankingloanmanagementsystem.abstractclasses.Account;
 
-
 public class CurrentAccount extends Account {
+    private static final long serialVersionUID = 1L;
+    private static final BigDecimal MIN_BALANCE = new BigDecimal("5000.00");
 
-    private double overdraftLimit;
+    private BigDecimal overdraftLimit;
 
     public CurrentAccount() {
+        super();
+        setAccountType("CURRENT");
     }
 
-    public CurrentAccount(long accountNumber,
-                          double balance,
-                          LocalDate openedDate,
-                          boolean active,
-                          int customerId,
-                          double overdraftLimit) {
-
-        super(accountNumber, balance,
-                openedDate, active, customerId);
-
+    public CurrentAccount(String accountNumber, BigDecimal balance, LocalDate openingDate, 
+                          String accountStatus, String mpin, String customerId, BigDecimal overdraftLimit) {
+        super(accountNumber, balance, openingDate, accountStatus, mpin, customerId, "CURRENT");
         this.overdraftLimit = overdraftLimit;
     }
 
     @Override
-    public void withdraw(double amount) {
-
-        if(getBalance() + overdraftLimit < amount) {
-            System.out.println("Overdraft limit exceeded");
-            return;
-        }
-
-        setBalance(getBalance() - amount);
+    public BigDecimal getMinimumBalance() {
+        return MIN_BALANCE;
     }
 
-    public double getOverdraftLimit() {
-        return overdraftLimit;
-    }
-
-    public void setOverdraftLimit(double overdraftLimit) {
-        this.overdraftLimit = overdraftLimit;
-    }
-
-    @Override
-    public String toString() {
-        return "CurrentAccount [overdraftLimit=" + overdraftLimit + "]";
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        if (!super.equals(o)) return false;
-        CurrentAccount that = (CurrentAccount) o;
-        return Double.compare(overdraftLimit, that.overdraftLimit) == 0;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(super.hashCode(), overdraftLimit);
-    }
+    public BigDecimal getOverdraftLimit() { return overdraftLimit; }
+    public void setOverdraftLimit(BigDecimal overdraftLimit) { this.overdraftLimit = overdraftLimit; }
 }

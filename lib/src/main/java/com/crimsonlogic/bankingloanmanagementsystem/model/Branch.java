@@ -1,72 +1,28 @@
 package com.crimsonlogic.bankingloanmanagementsystem.model;
 
-import java.util.Objects;
+import java.io.Serializable;
 
-public class Branch {
+public class Branch implements Serializable {
+    private static final long serialVersionUID = 1L;
 
-    private int branchId;
-    private String branchName;
-    private String location;
+    private String branchId;
+    private String bankName;
+    private String branchCity;
 
-    public Branch() {
-    }
+    public Branch() {}
 
-    public Branch(int branchId,
-                  String branchName,
-                  String location) {
-
+    public Branch(String branchId, String bankName, String branchCity) {
         this.branchId = branchId;
-        this.branchName = branchName;
-        this.location = location;
+        this.bankName = bankName;
+        this.branchCity = branchCity;
     }
 
-    public int getBranchId() {
-        return branchId;
-    }
+    public String getBranchId() { return branchId; }
+    public void setBranchId(String branchId) { this.branchId = branchId; }
 
-    public void setBranchId(int branchId) {
-        this.branchId = branchId;
-    }
+    public String getBankName() { return bankName; }
+    public void setBankName(String bankName) { this.bankName = bankName; }
 
-    public String getBranchName() {
-        return branchName;
-    }
-
-    public void setBranchName(String branchName) {
-        this.branchName = branchName;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(branchId);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-
-        if(this == obj)
-            return true;
-
-        if(obj == null || getClass() != obj.getClass())
-            return false;
-
-        Branch other = (Branch) obj;
-
-        return branchId == other.branchId;
-    }
-
-    @Override
-    public String toString() {
-        return "Branch [branchId=" + branchId +
-                ", branchName=" + branchName +
-                ", location=" + location + "]";
-    }
+    public String getBranchCity() { return branchCity; }
+    public void setBranchCity(String branchCity) { this.branchCity = branchCity; }
 }
