@@ -1,8 +1,6 @@
 package com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling;
 
 public class InsufficientBalanceException extends Exception {
-
-    public InsufficientBalanceException(String message) {
-        super(message);
-    }
+    private static final long serialVersionUID = 1L;
+    public InsufficientBalanceException(String message) { super(message); }
 }

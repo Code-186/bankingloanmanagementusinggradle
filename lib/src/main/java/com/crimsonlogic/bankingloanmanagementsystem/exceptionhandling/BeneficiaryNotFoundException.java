@@ -1,8 +1,6 @@
 package com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling;
 
 public class BeneficiaryNotFoundException extends Exception {
-
-    public BeneficiaryNotFoundException(String message) {
-        super(message);
-    }
+    private static final long serialVersionUID = 1L;
+    public BeneficiaryNotFoundException(String message) { super(message); }
 }
