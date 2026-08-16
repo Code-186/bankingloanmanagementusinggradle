@@ -35,6 +35,7 @@ dependencies {
 
     testImplementation("org.springframework:spring-test:5.3.39")
     implementation ("com.fasterxml.jackson.core:jackson-databind:2.17.2")
+    implementation("org.mindrot:jbcrypt:0.4")
 }
 
 tasks.test {
