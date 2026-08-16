@@ -135,7 +135,7 @@ public class AuthController {
 
         Customer registered = customerService.registerCustomer(newCust);
         
-        // Pass registered customer object back to same view (JSTL displays the success card)
+        // Pass registered customer object back so JSTL renders the success card on the same page
         model.addAttribute("customer", registered);
         return "auth/customer-register";
     }

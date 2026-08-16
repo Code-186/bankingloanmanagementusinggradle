@@ -27,13 +27,7 @@ public class BeneficiaryController {
         if (customer == null) return "redirect:/login";
 
         model.addAttribute("beneficiaries", beneficiaryService.getAllBeneficiaries(customer.getCustomerId()));
-        return "beneficiary-list";
-    }
-
-    @GetMapping("/add")
-    public String showAddBeneficiary(HttpSession session) {
-        if (session.getAttribute("loggedInUser") == null) return "redirect:/login";
-        return "beneficiary-add";
+        return "beneficiary/beneficiary";
     }
 
     @PostMapping("/add")
@@ -60,7 +54,7 @@ public class BeneficiaryController {
 
         try {
             beneficiaryService.removeBeneficiary(beneficiaryId, customer.getCustomerId());
-            model.addAttribute("message", "Beneficiary removed.");
+            model.addAttribute("message", "Beneficiary removed successfully.");
         } catch (BeneficiaryNotFoundException e) {
             model.addAttribute("error", e.getMessage());
         }
