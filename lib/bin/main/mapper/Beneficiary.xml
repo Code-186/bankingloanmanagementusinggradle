@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crimsonlogic.bankingloanmanagementsystem.dao.BeneficiaryMapper">
+
+    <resultMap id="BeneficiaryResultMap" type="com.crimsonlogic.bankingloanmanagementsystem.model.Beneficiary">
+        <id property="beneficiaryId" column="beneficiary_id"/>
+        <result property="beneficiaryName" column="beneficiary_name"/>
+        <result property="beneficiaryAccountNumber" column="beneficiary_account_number"/>
+        <result property="bankName" column="bank_name"/>
+        <result property="customerId" column="customer_id"/>
+    </resultMap>
+
+    <insert id="insertBeneficiary">
+        INSERT INTO beneficiaries (beneficiary_id, beneficiary_name, beneficiary_account_number, bank_name, customer_id)
+        VALUES (#{beneficiaryId}, #{beneficiaryName}, #{beneficiaryAccountNumber}, #{bankName}, #{customerId})
+    </insert>
+
+    <delete id="deleteBeneficiary">
+        DELETE FROM beneficiaries WHERE beneficiary_id = #{beneficiaryId} AND customer_id = #{customerId}
+    </delete>
+
+    <select id="findBeneficiaryById" resultMap="BeneficiaryResultMap">
+        SELECT * FROM beneficiaries WHERE beneficiary_id = #{beneficiaryId} AND customer_id = #{customerId}
+    </select>
+
+    <select id="findBeneficiariesByCustomerId" resultMap="BeneficiaryResultMap">
+        SELECT * FROM beneficiaries WHERE customer_id = #{customerId}
+    </select>
+
+    <select id="searchBeneficiaryByAccount" resultMap="BeneficiaryResultMap">
+        SELECT * FROM beneficiaries WHERE beneficiary_account_number = #{accountNumber} AND customer_id = #{customerId}
+    </select>
+</mapper>

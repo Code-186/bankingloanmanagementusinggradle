@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.crimsonlogic.bankingloanmanagementsystem.dao.AccountMapper">
+
+    <resultMap id="AccountBaseMap" type="com.crimsonlogic.bankingloanmanagementsystem.abstractclasses.Account">
+        <id property="accountNumber" column="account_number"/>
+        <result property="balance" column="balance"/>
+        <result property="openingDate" column="opening_date"/>
+        <result property="accountStatus" column="account_status"/>
+        <result property="mpin" column="mpin"/>
+        <result property="customerId" column="customer_id"/>
+        <result property="accountType" column="account_type"/>
+        <discriminator javaType="java.lang.String" column="account_type">
+            <case value="SAVINGS" resultType="com.crimsonlogic.bankingloanmanagementsystem.accountimplementation.SavingsAccount">
+                <result property="interestRate" column="interest_rate"/>
+            </case>
+            <case value="CURRENT" resultType="com.crimsonlogic.bankingloanmanagementsystem.accountimplementation.CurrentAccount">
+                <result property="overdraftLimit" column="overdraft_limit"/>
+            </case>
+        </discriminator>
+    </resultMap>
+
+    <insert id="insertSavingsAccount">
+        INSERT INTO accounts (account_number, balance, opening_date, account_status, mpin, customer_id, account_type, interest_rate)
+        VALUES (#{accountNumber}, #{balance}, #{openingDate}, #{accountStatus}, #{mpin}, #{customerId}, 'SAVINGS', #{interestRate})
+    </insert>
+
+    <insert id="insertCurrentAccount">
+        INSERT INTO accounts (account_number, balance, opening_date, account_status, mpin, customer_id, account_type, overdraft_limit)
+        VALUES (#{accountNumber}, #{balance}, #{openingDate}, #{accountStatus}, #{mpin}, #{customerId}, 'CURRENT', #{overdraftLimit})
+    </insert>
+
+    <select id="findByAccountNumber" resultMap="AccountBaseMap">
+        SELECT * FROM accounts WHERE account_number = #{accountNumber}
+    </select>
+
+    <select id="findAccountsByCustomerId" resultMap="AccountBaseMap">
+        SELECT * FROM accounts WHERE customer_id = #{customerId}
+    </select>
+
+    <select id="findAllAccounts" resultMap="AccountBaseMap">
+        SELECT * FROM accounts
+    </select>
+
+    <update id="updateBalance">
+        UPDATE accounts SET balance = #{balance} WHERE account_number = #{accountNumber}
+    </update>
+
+    <update id="updateAccountStatus">
+        UPDATE accounts SET account_status = #{accountStatus} WHERE account_number = #{accountNumber}
+    </update>
+</mapper>

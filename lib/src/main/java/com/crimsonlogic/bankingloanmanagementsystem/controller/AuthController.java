@@ -1,6 +1,8 @@
 package com.crimsonlogic.bankingloanmanagementsystem.controller;
 
+import java.time.LocalDate;
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,8 +21,6 @@ import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Customer;
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Employee;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.BankDetailsUtil;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.ValidationUtil;
-
-import java.time.LocalDate;
 
 @Controller
 public class AuthController {
@@ -85,7 +85,7 @@ public class AuthController {
     @GetMapping("/register/customer")
     public String showCustomerSelfRegisterPage(Model model) {
         model.addAttribute("banks", BankDetailsUtil.getAllBanks());
-        return "customer-register";
+        return "auth/customer-register";
     }
 
     @PostMapping("/register/customer")
@@ -104,28 +104,28 @@ public class AuthController {
 
         model.addAttribute("banks", BankDetailsUtil.getAllBanks());
 
-        // Validations
+        // Field Validations
         if (!ValidationUtil.validateName(name)) {
             model.addAttribute("error", "Invalid Name: Must contain letters only (min 3 chars) and no continuous repeats.");
-            return "customer-register";
+            return "auth/customer-register";
         }
         if (!ValidationUtil.validateEmail(email)) {
             model.addAttribute("error", "Invalid Email format.");
-            return "customer-register";
+            return "auth/customer-register";
         }
         if (!ValidationUtil.validatePhone(phone)) {
             model.addAttribute("error", "Invalid Phone: Must be 10 digits starting with 6-9.");
-            return "customer-register";
+            return "auth/customer-register";
         }
         if (!ValidationUtil.validatePassword(password)) {
             model.addAttribute("error", "Password must have 8-20 characters, 1 uppercase, 1 lowercase, 1 digit, and 1 special symbol.");
-            return "customer-register";
+            return "auth/customer-register";
         }
 
         LocalDate dob = LocalDate.parse(dobStr);
         if (!ValidationUtil.validateDob(dob)) {
             model.addAttribute("error", "Age must be at least 18 years.");
-            return "customer-register";
+            return "auth/customer-register";
         }
 
         String branchId = BankDetailsUtil.getBranchIdByBankName(bankName);
@@ -134,8 +134,10 @@ public class AuthController {
                 nomineeName, nomineeRelationship, nomineePhone);
 
         Customer registered = customerService.registerCustomer(newCust);
+        
+        // Pass registered customer object back to same view (JSTL displays the success card)
         model.addAttribute("customer", registered);
-        return "registration-success";
+        return "auth/customer-register";
     }
 
     @GetMapping("/logout")
