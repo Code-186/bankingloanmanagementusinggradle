@@ -3,6 +3,7 @@ package com.crimsonlogic.bankingloanmanagementsystem.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.crimsonlogic.bankingloanmanagementsystem.dao.EmployeeMapper;
 import com.crimsonlogic.bankingloanmanagementsystem.dao.CustomerMapper;
 import com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling.EmployeeNotFoundException;
@@ -11,6 +12,7 @@ import com.crimsonlogic.bankingloanmanagementsystem.service.interfaces.IEmployee
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Employee;
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Customer;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.IdGeneratorUtil;
+import com.crimsonlogic.bankingloanmanagementsystem.utility.PasswordUtil;
 
 @Service
 public class EmployeeService implements IEmployeeService {
@@ -24,15 +26,20 @@ public class EmployeeService implements IEmployeeService {
     @Override
     public Employee login(String email, String password) throws EmployeeNotFoundException {
         Employee employee = employeeMapper.findByEmail(email);
-        if (employee == null || !employee.getPassword().equals(password) || "INACTIVE".equalsIgnoreCase(employee.getStatus())) {
+        
+        // Secure BCrypt password check
+        if (employee == null || !PasswordUtil.verify(password, employee.getPassword()) || !"ACTIVE".equalsIgnoreCase(employee.getStatus())) {
             throw new EmployeeNotFoundException("Invalid credentials or Employee account is inactive.");
         }
         return employee;
     }
 
     @Override
+    @Transactional
     public Customer registerCustomer(Customer customer) {
         customer.setCustomerId(IdGeneratorUtil.generateCustomerId());
+        // Hash password before saving
+        customer.setPassword(PasswordUtil.hash(customer.getPassword()));
         customer.setStatus("REGISTERED");
         customerMapper.insertCustomer(customer);
         return customer;

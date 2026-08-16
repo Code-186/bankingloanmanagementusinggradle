@@ -3,6 +3,7 @@ package com.crimsonlogic.bankingloanmanagementsystem.service;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.crimsonlogic.bankingloanmanagementsystem.dao.BeneficiaryMapper;
 import com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling.BeneficiaryNotFoundException;
 import com.crimsonlogic.bankingloanmanagementsystem.model.Beneficiary;
@@ -16,6 +17,7 @@ public class BeneficiaryService implements IBeneficiaryService {
     private BeneficiaryMapper beneficiaryMapper;
 
     @Override
+    @Transactional
     public Beneficiary addBeneficiary(Beneficiary beneficiary) {
         beneficiary.setBeneficiaryId(IdGeneratorUtil.generateBeneficiaryId());
         beneficiaryMapper.insertBeneficiary(beneficiary);
@@ -23,6 +25,7 @@ public class BeneficiaryService implements IBeneficiaryService {
     }
 
     @Override
+    @Transactional
     public boolean removeBeneficiary(String beneficiaryId, String customerId) throws BeneficiaryNotFoundException {
         int rows = beneficiaryMapper.deleteBeneficiary(beneficiaryId, customerId);
         if (rows == 0) throw new BeneficiaryNotFoundException("Beneficiary ID " + beneficiaryId + " not found.");

@@ -19,6 +19,7 @@ import com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling.InvalidMpi
 import com.crimsonlogic.bankingloanmanagementsystem.model.Transaction;
 import com.crimsonlogic.bankingloanmanagementsystem.service.interfaces.IAccountService;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.IdGeneratorUtil;
+import com.crimsonlogic.bankingloanmanagementsystem.utility.PasswordUtil;
 
 @Service
 public class AccountService implements IAccountService {
@@ -36,7 +37,10 @@ public class AccountService implements IAccountService {
     @Transactional
     public SavingsAccount openSavingsAccount(String customerId, BigDecimal initialDeposit, String mpin, BigDecimal interestRate) {
         String accNo = String.valueOf(IdGeneratorUtil.generateAccountNumber());
-        SavingsAccount acc = new SavingsAccount(accNo, initialDeposit, LocalDate.now(), "ACTIVE", mpin, customerId, interestRate);
+        // 1. Hash the 4-digit MPIN before persisting
+        String hashedMpin = PasswordUtil.hash(mpin);
+
+        SavingsAccount acc = new SavingsAccount(accNo, initialDeposit, LocalDate.now(), "ACTIVE", hashedMpin, customerId, interestRate);
         accountMapper.insertSavingsAccount(acc);
         customerMapper.updateCustomerStatus(customerId, "ACTIVE");
 
@@ -49,7 +53,10 @@ public class AccountService implements IAccountService {
     @Transactional
     public CurrentAccount openCurrentAccount(String customerId, BigDecimal initialDeposit, String mpin, BigDecimal overdraftLimit) {
         String accNo = String.valueOf(IdGeneratorUtil.generateAccountNumber());
-        CurrentAccount acc = new CurrentAccount(accNo, initialDeposit, LocalDate.now(), "ACTIVE", mpin, customerId, overdraftLimit);
+        // 1. Hash the 4-digit MPIN before persisting
+        String hashedMpin = PasswordUtil.hash(mpin);
+
+        CurrentAccount acc = new CurrentAccount(accNo, initialDeposit, LocalDate.now(), "ACTIVE", hashedMpin, customerId, overdraftLimit);
         accountMapper.insertCurrentAccount(acc);
         customerMapper.updateCustomerStatus(customerId, "ACTIVE");
 
@@ -94,7 +101,9 @@ public class AccountService implements IAccountService {
     public boolean withdraw(String accountNumber, BigDecimal amount, String mpin) 
             throws AccountNotFoundException, InsufficientBalanceException, InvalidMpinException {
         Account acc = getAccountByNumber(accountNumber);
-        if (!acc.getMpin().equals(mpin)) {
+        
+        // 2. Verify entered MPIN against the hashed MPIN in DB
+        if (!PasswordUtil.verify(mpin, acc.getMpin())) {
             throw new InvalidMpinException("Invalid 4-digit MPIN entered.");
         }
         BigDecimal available = acc.getBalance();

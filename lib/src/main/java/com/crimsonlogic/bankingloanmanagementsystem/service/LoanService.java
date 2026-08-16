@@ -32,6 +32,7 @@ public class LoanService implements ILoanService {
     private IAccountService accountService;
 
     @Override
+    @Transactional
     public Loan applyLoan(String customerId, String loanType, BigDecimal amount, BigDecimal interestRate, Integer tenureMonths) {
         Loan loan = new Loan(
             IdGeneratorUtil.generateLoanId(),
@@ -126,6 +127,7 @@ public class LoanService implements ILoanService {
         if (emi == null || "PAID".equalsIgnoreCase(emi.getStatus())) {
             return false;
         }
+        // Deduct from account (MPIN checked via AccountService -> PasswordUtil)
         accountService.withdraw(accountNumber, emi.getEmiAmount(), mpin);
         emiMapper.updateEmiStatus(emiId, "PAID");
         return true;
