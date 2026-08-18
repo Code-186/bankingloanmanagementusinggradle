@@ -33,7 +33,7 @@ public class AdminService implements IAdminService {
     public Admin login(String email, String password) throws AdminNotFoundException {
         Admin admin = adminMapper.findByEmail(email);
         
-        // Secure BCrypt password check
+        // Verifies against plain text or BCrypt via PasswordUtil.verify
         if (admin == null || !PasswordUtil.verify(password, admin.getPassword()) || !"ACTIVE".equalsIgnoreCase(admin.getStatus())) {
             throw new AdminNotFoundException("Invalid credentials or Admin account is inactive.");
         }
@@ -43,7 +43,7 @@ public class AdminService implements IAdminService {
     @Override
     @Transactional
     public Admin registerAdmin(Admin admin) {
-        admin.setAdminId(IdGeneratorUtil.generateAdminId());
+        admin.setUserId(IdGeneratorUtil.generateAdminId());
         admin.setPassword(PasswordUtil.hash(admin.getPassword()));
         admin.setStatus("ACTIVE");
         adminMapper.insertAdmin(admin);
@@ -53,7 +53,7 @@ public class AdminService implements IAdminService {
     @Override
     @Transactional
     public Employee registerEmployee(Employee employee) {
-        employee.setEmployeeId(IdGeneratorUtil.generateEmployeeId());
+        employee.setUserId(IdGeneratorUtil.generateEmployeeId());
         employee.setPassword(PasswordUtil.hash(employee.getPassword()));
         employee.setStatus("ACTIVE");
         employeeMapper.insertEmployee(employee);

@@ -2,7 +2,11 @@ package com.crimsonlogic.bankingloanmanagementsystem.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.servlet.http.HttpSession;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,9 +19,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling.CustomerNotFoundException;
 import com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling.EmployeeNotFoundException;
 import com.crimsonlogic.bankingloanmanagementsystem.exceptionhandling.LoanNotFoundException;
+import com.crimsonlogic.bankingloanmanagementsystem.model.Loan;
 import com.crimsonlogic.bankingloanmanagementsystem.service.interfaces.IAdminService;
 import com.crimsonlogic.bankingloanmanagementsystem.service.interfaces.ILoanService;
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Admin;
+import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Customer;
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Employee;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.BankDetailsUtil;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.ValidationUtil;
@@ -33,96 +39,242 @@ public class AdminController {
     private ILoanService loanService;
 
     private boolean isAdmin(HttpSession session) {
-        return "ADMIN".equals(session.getAttribute("userRole"));
+        Object user = session.getAttribute("loggedInUser");
+        return (user instanceof Admin);
     }
 
+    private Admin getLoggedInAdmin(HttpSession session) {
+        Object user = session.getAttribute("loggedInUser");
+        if (user instanceof Admin) {
+            return (Admin) user;
+        }
+        return null;
+    }
+
+    // 1. DASHBOARD - STRICT BRANCH FILTERING
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
-        Admin admin = (Admin) session.getAttribute("loggedInUser");
+    public String showDashboard(HttpSession session, Model model) {
+        Admin admin = getLoggedInAdmin(session);
+        if (admin == null) {
+            return "redirect:/login?role=ADMIN";
+        }
         model.addAttribute("admin", admin);
+
+        // Filter ONLY admins belonging to this admin's branchId
+        List<Admin> allAdmins = adminService.getAllAdmins();
+        List<Admin> branchAdmins = (allAdmins != null) ? allAdmins.stream()
+                .filter(a -> a.getBranchId() != null && a.getBranchId().equalsIgnoreCase(admin.getBranchId()))
+                .collect(Collectors.toList()) : List.of();
+
+        // Filter ONLY employees belonging to this admin's branchId
+        List<Employee> allEmployees = adminService.getAllEmployees();
+        List<Employee> branchEmployees = (allEmployees != null) ? allEmployees.stream()
+                .filter(e -> e.getBranchId() != null && e.getBranchId().equalsIgnoreCase(admin.getBranchId()))
+                .collect(Collectors.toList()) : List.of();
+
+        // Filter ONLY customers belonging to this admin's branchId
+        List<Customer> allCustomers = adminService.getAllCustomers();
+        List<Customer> branchCustomers = (allCustomers != null) ? allCustomers.stream()
+                .filter(c -> c.getBranchId() != null && c.getBranchId().equalsIgnoreCase(admin.getBranchId()))
+                .collect(Collectors.toList()) : List.of();
+
+        // Fetch Loans
+        List<Loan> allLoans = loanService.getAllLoans();
+        List<Loan> pendingLoans = loanService.getPendingLoans();
+        List<Loan> approvedLoans = loanService.getApprovedLoans();
+
+        model.addAttribute("admins", branchAdmins);
+        model.addAttribute("employees", branchEmployees);
+        model.addAttribute("customers", branchCustomers);
+        model.addAttribute("allLoans", allLoans);
+        model.addAttribute("pendingLoans", pendingLoans);
+        model.addAttribute("approvedLoans", approvedLoans);
+
+        model.addAttribute("totalAdmins", branchAdmins.size());
+        model.addAttribute("totalEmployees", branchEmployees.size());
+        model.addAttribute("totalCustomers", branchCustomers.size());
+
         return "admin/admin-dashboard";
     }
 
-    // ===== STAFF MANAGEMENT =====
-    @GetMapping("/view/employees")
-    public String viewAllEmployees(HttpSession session, Model model) {
-        if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
-        model.addAttribute("employees", adminService.getAllEmployees());
-        return "admin/staff-management";
+    // 2. SHOW REGISTER EMPLOYEE
+    @GetMapping("/employees/register")
+    public String showRegisterEmployeeForm(HttpSession session, Model model) {
+        Admin admin = getLoggedInAdmin(session);
+        if (admin == null) return "redirect:/login?role=ADMIN";
+        model.addAttribute("admin", admin);
+        return "admin/employee-registration";
     }
 
-    @PostMapping("/employee/register")
-    public String processEmployeeRegister(
+    // 3. PROCESS REGISTER EMPLOYEE
+    @PostMapping("/employees/register")
+    public String processRegisterEmployee(
             @RequestParam("name") String name,
             @RequestParam("email") String email,
             @RequestParam("password") String password,
             @RequestParam("phone") String phone,
             @RequestParam("dob") String dobStr,
-            @RequestParam("designation") String designation,
+            @RequestParam("role") String designation,
             @RequestParam("salary") BigDecimal salary,
             @RequestParam(value = "address", required = false) String address,
-            HttpSession session, Model model) {
+            HttpSession session,
+            Model model) {
 
-        if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
-        Admin admin = (Admin) session.getAttribute("loggedInUser");
+        Admin admin = getLoggedInAdmin(session);
+        if (admin == null) return "redirect:/login?role=ADMIN";
 
-        if (!BankDetailsUtil.isValidOfficialEmail(email, admin.getBankName())) {
-            model.addAttribute("error", "Official email must end with: " + BankDetailsUtil.getOfficialDomainByBankName(admin.getBankName()));
-            model.addAttribute("employees", adminService.getAllEmployees());
-            return "admin/staff-management";
+        if (!ValidationUtil.validateName(name)) {
+            model.addAttribute("admin", admin);
+            model.addAttribute("error", "Invalid Name: Letters only (min 3 chars).");
+            return "admin/employee-registration";
+        }
+        if (!ValidationUtil.validateEmail(email)) {
+            model.addAttribute("admin", admin);
+            model.addAttribute("error", "Invalid Email format.");
+            return "admin/employee-registration";
+        }
+        if (!ValidationUtil.validatePhone(phone)) {
+            model.addAttribute("admin", admin);
+            model.addAttribute("error", "Invalid Phone: 10 digits starting with 6-9 required.");
+            return "admin/employee-registration";
         }
         if (!ValidationUtil.validatePassword(password)) {
-            model.addAttribute("error", "Password must satisfy security policy (8+ chars, uppercase, lowercase, digit, special character).");
-            model.addAttribute("employees", adminService.getAllEmployees());
-            return "admin/staff-management";
+            model.addAttribute("admin", admin);
+            model.addAttribute("error", "Password must have 8-20 chars, 1 uppercase, 1 lowercase, 1 number, 1 special.");
+            return "admin/employee-registration";
         }
 
-        Employee emp = new Employee(null, name, phone, email, address, password, LocalDate.parse(dobStr),
-                admin.getBankName(), admin.getBranchId(), "ACTIVE", designation, salary);
+        try {
+            Employee newEmp = new Employee();
+            newEmp.setName(name);
+            newEmp.setPhoneNumber(phone);
+            newEmp.setEmail(email);
+            newEmp.setAddress(address);
+            newEmp.setPassword(password);
+            newEmp.setDateOfBirth(LocalDate.parse(dobStr));
+            newEmp.setBankName(admin.getBankName());
+            newEmp.setBranchId(admin.getBranchId());
+            newEmp.setStatus("ACTIVE");
+            newEmp.setDesignation(designation);
+            newEmp.setSalary(salary);
 
-        adminService.registerEmployee(emp);
-        model.addAttribute("message", "Employee registered successfully!");
-        model.addAttribute("employees", adminService.getAllEmployees());
-        return "admin/staff-management";
+            Employee saved = adminService.registerEmployee(newEmp);
+
+            // Forward directly back to dashboard with registered employee object
+            showDashboard(session, model);
+            model.addAttribute("registeredEmployee", saved);
+            model.addAttribute("successMessage", "Employee successfully registered and activated!");
+            return "admin/admin-dashboard";
+
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            model.addAttribute("admin", admin);
+            model.addAttribute("error", "An employee account with email '" + email + "' already exists.");
+            return "admin/employee-registration";
+        }
     }
 
-    @PostMapping("/employee/delete")
-    public String deleteEmployee(@RequestParam("employeeId") String employeeId, HttpSession session, Model model) {
+    // 4. ADD NEW ADMIN
+    @PostMapping("/admins/register")
+    public String processRegisterAdmin(
+            @RequestParam("name") String name,
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            @RequestParam("phone") String phone,
+            @RequestParam("dob") String dobStr,
+            @RequestParam("role") String role,
+            @RequestParam("salary") BigDecimal salary,
+            @RequestParam(value = "address", required = false) String address,
+            HttpSession session,
+            Model model) {
+
+        Admin currentAdmin = getLoggedInAdmin(session);
+        if (currentAdmin == null) return "redirect:/login?role=ADMIN";
+
+        try {
+            Admin newAdmin = new Admin();
+            newAdmin.setName(name);
+            newAdmin.setPhoneNumber(phone);
+            newAdmin.setEmail(email);
+            newAdmin.setAddress(address);
+            newAdmin.setPassword(password);
+            newAdmin.setDateOfBirth(LocalDate.parse(dobStr));
+            newAdmin.setBankName(currentAdmin.getBankName());
+            newAdmin.setBranchId(currentAdmin.getBranchId());
+            newAdmin.setStatus("ACTIVE");
+            newAdmin.setRole(role);
+            newAdmin.setSalary(salary);
+
+            Admin savedAdmin = adminService.registerAdmin(newAdmin);
+
+            showDashboard(session, model);
+            model.addAttribute("registeredAdmin", savedAdmin);
+            model.addAttribute("successMessage", "Admin successfully registered for " + currentAdmin.getBankName());
+            return "admin/admin-dashboard";
+
+        } catch (org.springframework.dao.DuplicateKeyException e) {
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Admin email '" + email + "' already exists.");
+            return "admin/admin-dashboard";
+        }
+    }
+
+    // 5. DELETE EMPLOYEE
+    @PostMapping("/employees/delete/{id}")
+    public String deleteEmployee(@PathVariable("id") String employeeId, HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
         try {
             adminService.deleteEmployee(employeeId);
-            model.addAttribute("message", "Employee " + employeeId + " deactivated successfully.");
+            showDashboard(session, model);
+            model.addAttribute("successMessage", "Employee ID " + employeeId + " has been successfully deactivated.");
         } catch (EmployeeNotFoundException e) {
-            model.addAttribute("error", e.getMessage());
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Employee ID " + employeeId + " not found.");
         }
-        return "redirect:/admin/view/employees";
+        return "admin/admin-dashboard";
     }
 
-    // ===== CUSTOMER MANAGEMENT =====
-    @GetMapping("/view/customers")
-    public String viewAllCustomers(HttpSession session, Model model) {
-        if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
-        model.addAttribute("customers", adminService.getAllCustomers());
-        return "admin/customer-management";
-    }
-
-    @PostMapping("/customer/delete")
-    public String deleteCustomer(@RequestParam("customerId") String customerId, HttpSession session, Model model) {
+    // 6. DELETE CUSTOMER
+    @PostMapping("/customers/delete/{id}")
+    public String deleteCustomer(@PathVariable("id") String customerId, HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
         try {
             adminService.deleteCustomer(customerId);
-            model.addAttribute("message", "Customer " + customerId + " deactivated successfully.");
+            showDashboard(session, model);
+            model.addAttribute("successMessage", "Customer ID " + customerId + " has been successfully deactivated.");
         } catch (CustomerNotFoundException e) {
-            model.addAttribute("error", e.getMessage());
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Customer ID " + customerId + " not found.");
         }
-        return "redirect:/admin/view/customers";
+        return "admin/admin-dashboard";
     }
 
-    // ===== REPORTS =====
-    @GetMapping("/reports")
-    public String showReportsHub(HttpSession session) {
+    // 7. APPROVE LOAN
+    @PostMapping("/loan/approve/{loanId}")
+    public String approveLoan(@PathVariable("loanId") String loanId, HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
-        return "admin/reports-hub";
+        try {
+            loanService.approveLoan(loanId);
+            showDashboard(session, model);
+            model.addAttribute("successMessage", "Loan ID " + loanId + " approved and monthly EMI schedule generated.");
+        } catch (LoanNotFoundException e) {
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Loan ID " + loanId + " not found.");
+        }
+        return "admin/admin-dashboard";
+    }
+
+    // 8. REJECT LOAN
+    @PostMapping("/loan/reject/{loanId}")
+    public String rejectLoan(@PathVariable("loanId") String loanId, HttpSession session, Model model) {
+        if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
+        try {
+            loanService.rejectLoan(loanId);
+            showDashboard(session, model);
+            model.addAttribute("successMessage", "Loan ID " + loanId + " rejected.");
+        } catch (LoanNotFoundException e) {
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Loan ID " + loanId + " not found.");
+        }
+        return "admin/admin-dashboard";
     }
 }

@@ -25,6 +25,8 @@ import com.crimsonlogic.bankingloanmanagementsystem.utility.ValidationUtil;
 @Controller
 public class AuthController {
 
+    private static final int MAX_LOGIN_ATTEMPTS = 3;
+
     @Autowired
     private IAdminService adminService;
 
@@ -52,22 +54,48 @@ public class AuthController {
                                HttpSession session,
                                Model model) {
         model.addAttribute("role", role);
+
+        String lockKey = "LOCK_" + email.toLowerCase().trim();
+        String attemptKey = "ATTEMPTS_" + email.toLowerCase().trim();
+
+        // 1. Check if user is locked out
+        Boolean isLocked = (Boolean) session.getAttribute(lockKey);
+        if (Boolean.TRUE.equals(isLocked)) {
+            model.addAttribute("error", "Account locked! You have exceeded the maximum limit of 3 login attempts.");
+            return "login";
+        }
+
+        // 2. Fetch existing attempt count
+        Integer attempts = (Integer) session.getAttribute(attemptKey);
+        if (attempts == null) {
+            attempts = 0;
+        }
+
         try {
             switch (role.toUpperCase()) {
                 case "ADMIN":
                     Admin admin = adminService.login(email, password);
+                    // Login successful -> reset attempts
+                    session.removeAttribute(attemptKey);
+                    session.removeAttribute(lockKey);
                     session.setAttribute("loggedInUser", admin);
                     session.setAttribute("userRole", "ADMIN");
                     return "redirect:/admin/dashboard";
 
                 case "EMPLOYEE":
                     Employee employee = employeeService.login(email, password);
+                    // Login successful -> reset attempts
+                    session.removeAttribute(attemptKey);
+                    session.removeAttribute(lockKey);
                     session.setAttribute("loggedInUser", employee);
                     session.setAttribute("userRole", "EMPLOYEE");
                     return "redirect:/employee/dashboard";
 
                 case "CUSTOMER":
                     Customer customer = customerService.login(email, password);
+                    // Login successful -> reset attempts
+                    session.removeAttribute(attemptKey);
+                    session.removeAttribute(lockKey);
                     session.setAttribute("loggedInUser", customer);
                     session.setAttribute("userRole", "CUSTOMER");
                     return "redirect:/customer/dashboard";
@@ -77,7 +105,17 @@ public class AuthController {
                     return "login";
             }
         } catch (AdminNotFoundException | EmployeeNotFoundException | CustomerNotFoundException e) {
-            model.addAttribute("error", e.getMessage());
+            // Failed attempt: Increment counter
+            attempts++;
+            session.setAttribute(attemptKey, attempts);
+            int remaining = MAX_LOGIN_ATTEMPTS - attempts;
+
+            if (remaining <= 0) {
+                session.setAttribute(lockKey, true);
+                model.addAttribute("error", "Account locked! You have exceeded the maximum limit of 3 login attempts.");
+            } else {
+                model.addAttribute("error", e.getMessage() + " (" + remaining + " attempt(s) remaining)");
+            }
             return "login";
         }
     }

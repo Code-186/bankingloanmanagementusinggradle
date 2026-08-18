@@ -34,7 +34,4 @@
         VALUES (#{userId}, #{name}, #{phoneNumber}, #{email}, #{address}, #{password}, #{dateOfBirth}, #{bankName}, #{status}, #{role}, #{salary}, #{branchId})
     </insert>
 
-    <update id="updateAdminStatus">
-        UPDATE admins SET status = #{status} WHERE admin_id = #{adminId}
-    </update>
 </mapper>
