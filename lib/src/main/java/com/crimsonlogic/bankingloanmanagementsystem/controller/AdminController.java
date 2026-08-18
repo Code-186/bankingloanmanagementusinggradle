@@ -25,7 +25,6 @@ import com.crimsonlogic.bankingloanmanagementsystem.service.interfaces.ILoanServ
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Admin;
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Customer;
 import com.crimsonlogic.bankingloanmanagementsystem.userimplementation.Employee;
-import com.crimsonlogic.bankingloanmanagementsystem.utility.BankDetailsUtil;
 import com.crimsonlogic.bankingloanmanagementsystem.utility.ValidationUtil;
 
 @Controller
@@ -60,25 +59,22 @@ public class AdminController {
         }
         model.addAttribute("admin", admin);
 
-        // Filter ONLY admins belonging to this admin's branchId
+        // Filter strictly by this admin's branchId
         List<Admin> allAdmins = adminService.getAllAdmins();
         List<Admin> branchAdmins = (allAdmins != null) ? allAdmins.stream()
                 .filter(a -> a.getBranchId() != null && a.getBranchId().equalsIgnoreCase(admin.getBranchId()))
                 .collect(Collectors.toList()) : List.of();
 
-        // Filter ONLY employees belonging to this admin's branchId
         List<Employee> allEmployees = adminService.getAllEmployees();
         List<Employee> branchEmployees = (allEmployees != null) ? allEmployees.stream()
                 .filter(e -> e.getBranchId() != null && e.getBranchId().equalsIgnoreCase(admin.getBranchId()))
                 .collect(Collectors.toList()) : List.of();
 
-        // Filter ONLY customers belonging to this admin's branchId
         List<Customer> allCustomers = adminService.getAllCustomers();
         List<Customer> branchCustomers = (allCustomers != null) ? allCustomers.stream()
                 .filter(c -> c.getBranchId() != null && c.getBranchId().equalsIgnoreCase(admin.getBranchId()))
                 .collect(Collectors.toList()) : List.of();
 
-        // Fetch Loans
         List<Loan> allLoans = loanService.getAllLoans();
         List<Loan> pendingLoans = loanService.getPendingLoans();
         List<Loan> approvedLoans = loanService.getApprovedLoans();
@@ -135,7 +131,7 @@ public class AdminController {
         }
         if (!ValidationUtil.validatePhone(phone)) {
             model.addAttribute("admin", admin);
-            model.addAttribute("error", "Invalid Phone: 10 digits starting with 6-9 required.");
+            model.addAttribute("error", "Invalid Phone: Must be 10 digits starting with 6-9.");
             return "admin/employee-registration";
         }
         if (!ValidationUtil.validatePassword(password)) {
@@ -160,9 +156,9 @@ public class AdminController {
 
             Employee saved = adminService.registerEmployee(newEmp);
 
-            // Forward directly back to dashboard with registered employee object
             showDashboard(session, model);
             model.addAttribute("registeredEmployee", saved);
+            model.addAttribute("activeTab", "tab-all-emp");
             model.addAttribute("successMessage", "Employee successfully registered and activated!");
             return "admin/admin-dashboard";
 
@@ -190,6 +186,19 @@ public class AdminController {
         Admin currentAdmin = getLoggedInAdmin(session);
         if (currentAdmin == null) return "redirect:/login?role=ADMIN";
 
+        if (!ValidationUtil.validateName(name)) {
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Invalid Name: Letters only (min 3 chars).");
+            model.addAttribute("activeTab", "tab-add-admin");
+            return "admin/admin-dashboard";
+        }
+        if (!ValidationUtil.validatePhone(phone)) {
+            showDashboard(session, model);
+            model.addAttribute("errorMessage", "Invalid Phone: Must be 10 digits starting with 6-9.");
+            model.addAttribute("activeTab", "tab-add-admin");
+            return "admin/admin-dashboard";
+        }
+
         try {
             Admin newAdmin = new Admin();
             newAdmin.setName(name);
@@ -208,42 +217,48 @@ public class AdminController {
 
             showDashboard(session, model);
             model.addAttribute("registeredAdmin", savedAdmin);
-            model.addAttribute("successMessage", "Admin successfully registered for " + currentAdmin.getBankName());
+            model.addAttribute("activeTab", "tab-view-admins");
+            model.addAttribute("successMessage", "New Admin successfully registered for " + currentAdmin.getBankName());
             return "admin/admin-dashboard";
 
         } catch (org.springframework.dao.DuplicateKeyException e) {
             showDashboard(session, model);
             model.addAttribute("errorMessage", "Admin email '" + email + "' already exists.");
+            model.addAttribute("activeTab", "tab-add-admin");
             return "admin/admin-dashboard";
         }
     }
 
-    // 5. DELETE EMPLOYEE
+    // 5. DELETE EMPLOYEE (Soft Delete)
     @PostMapping("/employees/delete/{id}")
     public String deleteEmployee(@PathVariable("id") String employeeId, HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
         try {
             adminService.deleteEmployee(employeeId);
             showDashboard(session, model);
-            model.addAttribute("successMessage", "Employee ID " + employeeId + " has been successfully deactivated.");
+            model.addAttribute("successMessage", "Employee ID " + employeeId + " status updated to INACTIVE (Soft Deleted).");
+            model.addAttribute("activeTab", "tab-all-emp");
         } catch (EmployeeNotFoundException e) {
             showDashboard(session, model);
             model.addAttribute("errorMessage", "Employee ID " + employeeId + " not found.");
+            model.addAttribute("activeTab", "tab-delete-emp");
         }
         return "admin/admin-dashboard";
     }
 
-    // 6. DELETE CUSTOMER
+    // 6. DELETE CUSTOMER (Soft Delete)
     @PostMapping("/customers/delete/{id}")
     public String deleteCustomer(@PathVariable("id") String customerId, HttpSession session, Model model) {
         if (!isAdmin(session)) return "redirect:/login?role=ADMIN";
         try {
             adminService.deleteCustomer(customerId);
             showDashboard(session, model);
-            model.addAttribute("successMessage", "Customer ID " + customerId + " has been successfully deactivated.");
+            model.addAttribute("successMessage", "Customer ID " + customerId + " status updated to INACTIVE (Soft Deleted).");
+            model.addAttribute("activeTab", "tab-all-cust");
         } catch (CustomerNotFoundException e) {
             showDashboard(session, model);
             model.addAttribute("errorMessage", "Customer ID " + customerId + " not found.");
+            model.addAttribute("activeTab", "tab-delete-cust");
         }
         return "admin/admin-dashboard";
     }
@@ -256,9 +271,11 @@ public class AdminController {
             loanService.approveLoan(loanId);
             showDashboard(session, model);
             model.addAttribute("successMessage", "Loan ID " + loanId + " approved and monthly EMI schedule generated.");
+            model.addAttribute("activeTab", "tab-approved-loans");
         } catch (LoanNotFoundException e) {
             showDashboard(session, model);
             model.addAttribute("errorMessage", "Loan ID " + loanId + " not found.");
+            model.addAttribute("activeTab", "tab-approve-loan");
         }
         return "admin/admin-dashboard";
     }
@@ -271,9 +288,11 @@ public class AdminController {
             loanService.rejectLoan(loanId);
             showDashboard(session, model);
             model.addAttribute("successMessage", "Loan ID " + loanId + " rejected.");
+            model.addAttribute("activeTab", "tab-all-loans");
         } catch (LoanNotFoundException e) {
             showDashboard(session, model);
             model.addAttribute("errorMessage", "Loan ID " + loanId + " not found.");
+            model.addAttribute("activeTab", "tab-reject-loan");
         }
         return "admin/admin-dashboard";
     }

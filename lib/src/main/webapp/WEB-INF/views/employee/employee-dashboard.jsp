@@ -9,10 +9,10 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #f1f5f9; color: #1e293b; display: flex; min-height: 100vh; }
         
-        .sidebar { width: 260px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .sidebar { width: 280px; background-color: #0f172a; color: white; display: flex; flex-direction: column; flex-shrink: 0; height: 100vh; position: sticky; top: 0; }
         .sidebar-brand { padding: 1.5rem; font-size: 1.2rem; font-weight: 700; border-bottom: 1px solid #1e293b; }
         .sidebar-brand span { color: #10b981; display: block; font-size: 0.85rem; font-weight: normal; margin-top: 4px; }
-        .sidebar-menu { list-style: none; padding: 1rem 0; flex: 1; }
+        .sidebar-menu { list-style: none; padding: 1rem 0; flex: 1; overflow-y: auto; }
         .menu-category { font-size: 0.75rem; text-transform: uppercase; color: #64748b; padding: 0.75rem 1.5rem 0.25rem; font-weight: 700; }
         .menu-item { display: flex; align-items: center; padding: 0.75rem 1.5rem; color: #cbd5e1; text-decoration: none; cursor: pointer; font-size: 0.95rem; }
         .menu-item:hover, .menu-item.active { background-color: #1e293b; color: #10b981; border-left: 4px solid #10b981; }
@@ -26,20 +26,17 @@
         .card { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 1.5rem; }
         .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; }
         .search-bar { display: flex; gap: 0.75rem; align-items: center; }
-        .input-control { padding: 0.6rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; }
+        .input-control { padding: 0.6rem 0.85rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.9rem; width: 280px; }
         .btn { padding: 0.6rem 1.2rem; border-radius: 6px; text-decoration: none; font-weight: 600; cursor: pointer; border: none; font-size: 0.9rem; }
         .btn-primary { background-color: #10b981; color: white; }
         .btn-primary:hover { background-color: #059669; }
-        .btn-action { background-color: #2563eb; color: white; padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 4px; text-decoration: none; margin-right: 4px; }
-        .btn-danger { background-color: #ef4444; color: white; padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 4px; text-decoration: none; }
+        .btn-action { background-color: #2563eb; color: white; padding: 0.35rem 0.75rem; font-size: 0.8rem; border-radius: 4px; text-decoration: none; }
         
-        table { width: 100%; border-collapse: collapse; text-align: left; }
+        table { width: 100%; border-collapse: collapse; text-align: left; margin-top: 10px; }
         th { background-color: #0f172a; color: white; padding: 0.75rem 1rem; font-size: 0.85rem; }
         td { padding: 0.85rem 1rem; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
-        tr:hover { background-color: #f8fafc; }
-        .badge { padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 700; }
-        .badge-active { background-color: #dcfce7; color: #166534; }
-        .badge-pending { background-color: #fef9c3; color: #854d0e; }
+        tr:nth-child(even) { background-color: #f8fafc; }
+        .badge-active { color: #166534; font-weight: bold; background: #dcfce7; padding: 3px 8px; border-radius: 4px; font-size: 12px; }
 
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
@@ -50,21 +47,16 @@
     <aside class="sidebar">
         <div class="sidebar-brand">
             🏦 Employee Desk
-            <span>Branch: ${sessionScope.loggedUser.branchId}</span>
+            <span>Branch: ${sessionScope.loggedInUser.branchId} (${sessionScope.loggedInUser.bankName})</span>
         </div>
         <ul class="sidebar-menu">
             <li class="menu-category">Customer Operations</li>
             <li><a class="menu-item active" onclick="showEmpTab(event, 'customersPanel')">👤 View Branch Customers</a></li>
-            <li><a class="menu-item" href="${pageContext.request.contextPath}/employee/register-customer">➕ Register New Customer</a></li>
+            <li><a class="menu-item" href="${pageContext.request.contextPath}/employee/customer/register">➕ Register New Customer</a></li>
 
             <li class="menu-category">Account Desk</li>
-            <li><a class="menu-item" href="${pageContext.request.contextPath}/account/open-savings">💳 Open Savings Account</a></li>
-            <li><a class="menu-item" href="${pageContext.request.contextPath}/account/open-current">🏢 Open Current Account</a></li>
-            <li><a class="menu-item" href="${pageContext.request.contextPath}/account/deposit">📥 Cash Deposit</a></li>
-            <li><a class="menu-item" href="${pageContext.request.contextPath}/account/withdraw">📤 Counter Withdrawal</a></li>
-
-            <li class="menu-category">Loan Processing</li>
-            <li><a class="menu-item" onclick="showEmpTab(event, 'loansPanel')">📋 Pending Loan Applications</a></li>
+            <li><a class="menu-item" href="${pageContext.request.contextPath}/account/open">💳 Open New Account (Savings / Current)</a></li>
+            <li><a class="menu-item" href="${pageContext.request.contextPath}/account/operations">📥 Teller Desk (Deposit / Withdraw)</a></li>
         </ul>
         <div class="sidebar-footer">
             <a href="${pageContext.request.contextPath}/logout" class="btn-logout">Logout</a>
@@ -73,8 +65,8 @@
 
     <main class="main-wrapper">
         <header class="topbar">
-            <h2>Officer: <strong>${sessionScope.loggedUser.name}</strong> (${sessionScope.loggedUser.designation})</h2>
-            <a href="${pageContext.request.contextPath}/employee/register-customer" class="btn btn-primary">+ Onboard Customer</a>
+            <h2>Officer: <strong>${sessionScope.loggedInUser.name}</strong> (${sessionScope.loggedInUser.designation})</h2>
+            <a href="${pageContext.request.contextPath}/employee/customer/register" class="btn btn-primary">+ Onboard Customer</a>
         </header>
 
         <div class="content-area">
@@ -82,7 +74,7 @@
             <section id="customersPanel" class="tab-panel active">
                 <div class="card">
                     <div class="card-header">
-                        <h3>Branch Customers Directory</h3>
+                        <h3>Branch Customers Directory (${sessionScope.loggedInUser.branchId})</h3>
                         <div class="search-bar">
                             <input type="text" id="empCustSearch" class="input-control" placeholder="Search Customer ID / Name..." onkeyup="filterData('empCustSearch', 'empCustomerTable')">
                         </div>
@@ -101,53 +93,19 @@
                         <tbody>
                             <c:forEach var="c" items="${customerList}">
                                 <tr>
-                                    <td><strong>${c.customerId}</strong></td>
+                                    <td><strong>${c.userId}</strong></td>
                                     <td>${c.name}</td>
                                     <td>${c.email}</td>
                                     <td>${c.phoneNumber}</td>
-                                    <td><span class="badge badge-active">${c.status}</span></td>
+                                    <td><span class="badge-active">${c.status}</span></td>
                                     <td>
-                                        <a href="${pageContext.request.contextPath}/account/view-details?customerId=${c.customerId}" class="btn-action">View Accounts</a>
+                                        <a href="${pageContext.request.contextPath}/employee/customer/${c.userId}" class="btn-action">View Profile</a>
                                     </td>
                                 </tr>
                             </c:forEach>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section id="loansPanel" class="tab-panel">
-                <div class="card">
-                    <div class="card-header">
-                        <h3>Pending Loan Applications</h3>
-                    </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Loan ID</th>
-                                <th>Customer ID</th>
-                                <th>Type</th>
-                                <th>Amount (₹)</th>
-                                <th>Tenure</th>
-                                <th>Interest</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <c:forEach var="l" items="${pendingLoanList}">
-                                <tr>
-                                    <td><strong>${l.loanId}</strong></td>
-                                    <td>${l.customerId}</td>
-                                    <td>${l.loanType}</td>
-                                    <td>₹ ${l.loanAmount}</td>
-                                    <td>${l.tenureMonths} Months</td>
-                                    <td>${l.interestRate}%</td>
-                                    <td>
-                                        <a href="${pageContext.request.contextPath}/loan/approve?loanId=${l.loanId}" class="btn-action" onclick="return confirm('Approve this loan and generate EMI schedule?')">Approve</a>
-                                        <a href="${pageContext.request.contextPath}/loan/reject?loanId=${l.loanId}" class="btn-danger" onclick="return confirm('Reject this loan application?')">Reject</a>
-                                    </td>
-                                </tr>
-                            </c:forEach>
+                            <c:if test="${empty customerList}">
+                                <tr><td colspan="6" style="text-align:center; padding:15px; color:#64748b;">No customers registered in this branch yet.</td></tr>
+                            </c:if>
                         </tbody>
                     </table>
                 </div>

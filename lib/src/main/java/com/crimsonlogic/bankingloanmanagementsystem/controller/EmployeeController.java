@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -48,28 +47,32 @@ public class EmployeeController {
             return "redirect:/login?role=EMPLOYEE";
         }
         Employee employee = (Employee) session.getAttribute("loggedInUser");
+        if (employee == null) {
+            return "redirect:/login?role=EMPLOYEE";
+        }
+
         List<Customer> customerList = employeeService.viewAllCustomers(employee.getBranchId());
-        List<Loan> pendingLoans = loanService.getPendingLoans();
 
         model.addAttribute("employee", employee);
         model.addAttribute("customerList", customerList);
-        model.addAttribute("loanList", pendingLoans);
         return "employee/employee-dashboard";
     }
 
-    // 2. ASSISTED CUSTOMER ONBOARDING (SHOW FORM)
+    // 2. ASSISTED CUSTOMER REGISTRATION (SHOW FORM)
     @GetMapping("/customer/register")
     public String showRegisterCustomer(HttpSession session, Model model) {
         if (!isEmployee(session)) {
             return "redirect:/login?role=EMPLOYEE";
         }
         Employee employee = (Employee) session.getAttribute("loggedInUser");
+        if (employee == null) return "redirect:/login?role=EMPLOYEE";
+
         model.addAttribute("bankName", employee.getBankName());
         model.addAttribute("branchId", employee.getBranchId());
         return "employee/customer-register";
     }
 
-    // 3. ASSISTED CUSTOMER ONBOARDING (SUBMIT)
+    // 3. ASSISTED CUSTOMER REGISTRATION (SUBMIT FORM)
     @PostMapping("/customer/register")
     public String processRegisterCustomer(
             @RequestParam("name") String name,
@@ -87,8 +90,8 @@ public class EmployeeController {
         if (!isEmployee(session)) {
             return "redirect:/login?role=EMPLOYEE";
         }
-
         Employee employee = (Employee) session.getAttribute("loggedInUser");
+        if (employee == null) return "redirect:/login?role=EMPLOYEE";
 
         if (!ValidationUtil.validateName(name) || !ValidationUtil.validatePhone(phone) || !ValidationUtil.validateEmail(email)) {
             model.addAttribute("error", "Validation error: Check Name, Phone, and Email formats.");
@@ -102,7 +105,6 @@ public class EmployeeController {
                 "REGISTERED", nomineeName, nomineeRelationship, nomineePhone);
 
         employeeService.registerCustomer(cust);
-        model.addAttribute("message", "Customer " + cust.getName() + " onboarded successfully!");
         return "redirect:/employee/dashboard";
     }
 

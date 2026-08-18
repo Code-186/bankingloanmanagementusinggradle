@@ -13,6 +13,7 @@
         <result property="bankName" column="bank_name" />
         <result property="branchId" column="branch_id" />
         <result property="status" column="status" />
+        <result property="mpin" column="mpin" />
         <result property="createdAt" column="created_at" />
 
         <discriminator javaType="java.lang.String" column="account_type">
@@ -21,32 +22,49 @@
         </discriminator>
     </resultMap>
 
+    <!-- 1. Find Account by Number -->
     <select id="findByAccountNumber" resultMap="AccountResultMap">
-        SELECT account_number, customer_id, account_type, balance, bank_name, branch_id, status, created_at
+        SELECT account_number, customer_id, account_type, balance, bank_name, branch_id, status, mpin, created_at
         FROM accounts
         WHERE account_number = #{accountNumber}
     </select>
 
+    <!-- 2. Find Accounts by Customer ID -->
     <select id="findAccountsByCustomerId" resultMap="AccountResultMap">
-        SELECT account_number, customer_id, account_type, balance, bank_name, branch_id, status, created_at
+        SELECT account_number, customer_id, account_type, balance, bank_name, branch_id, status, mpin, created_at
         FROM accounts
         WHERE customer_id = #{customerId}
     </select>
 
-    <insert id="insertAccount" parameterType="com.crimsonlogic.bankingloanmanagementsystem.abstractclasses.Account">
-        INSERT INTO accounts (account_number, customer_id, account_type, balance, bank_name, branch_id, status, created_at)
-        VALUES (#{accountNumber}, #{customerId}, #{accountType}, #{balance}, #{bankName}, #{branchId}, #{status}, #{createdAt})
+    <!-- 3. Find All Accounts -->
+    <select id="findAllAccounts" resultMap="AccountResultMap">
+        SELECT account_number, customer_id, account_type, balance, bank_name, branch_id, status, mpin, created_at
+        FROM accounts
+    </select>
+
+    <!-- 4. Insert Savings Account -->
+    <insert id="insertSavingsAccount" parameterType="com.crimsonlogic.bankingloanmanagementsystem.accountimplementation.SavingsAccount">
+        INSERT INTO accounts (account_number, customer_id, account_type, balance, bank_name, branch_id, status, mpin, created_at)
+        VALUES (#{accountNumber}, #{customerId}, 'SAVINGS', #{balance}, #{bankName}, #{branchId}, #{status}, #{mpin}, #{createdAt})
     </insert>
 
+    <!-- 5. Insert Current Account -->
+    <insert id="insertCurrentAccount" parameterType="com.crimsonlogic.bankingloanmanagementsystem.accountimplementation.CurrentAccount">
+        INSERT INTO accounts (account_number, customer_id, account_type, balance, bank_name, branch_id, status, mpin, created_at)
+        VALUES (#{accountNumber}, #{customerId}, 'CURRENT', #{balance}, #{bankName}, #{branchId}, #{status}, #{mpin}, #{createdAt})
+    </insert>
+
+    <!-- 6. Update Account Balance -->
     <update id="updateBalance">
         UPDATE accounts
         SET balance = #{balance}
         WHERE account_number = #{accountNumber}
     </update>
 
+    <!-- 7. Update Account Status -->
     <update id="updateAccountStatus">
         UPDATE accounts
-        SET status = #{status}
+        SET status = #{accountStatus}
         WHERE account_number = #{accountNumber}
     </update>
 

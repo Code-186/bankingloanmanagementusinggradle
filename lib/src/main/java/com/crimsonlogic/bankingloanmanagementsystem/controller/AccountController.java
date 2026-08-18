@@ -27,7 +27,7 @@ public class AccountController {
     @Autowired
     private IAccountService accountService;
 
-    // 1. Open Account
+    // 1. Open Account Page (Employee Desk)
     @GetMapping("/open")
     public String showOpenAccountPage(HttpSession session) {
         if (!"EMPLOYEE".equals(session.getAttribute("userRole"))) {
@@ -49,7 +49,7 @@ public class AccountController {
         }
 
         if (!ValidationUtil.validateMPin(mpin)) {
-            model.addAttribute("error", "MPIN must be exactly 4 digits.");
+            model.addAttribute("error", "MPIN must be exactly 4 numeric digits.");
             return "account/account-open";
         }
 
@@ -67,11 +67,10 @@ public class AccountController {
             accountService.openCurrentAccount(customerId, initialDeposit, mpin, new BigDecimal("25000.00"));
         }
 
-        model.addAttribute("message", "Account successfully created and activated.");
-        return "employee/employee-dashboard";
+        return "redirect:/employee/dashboard";
     }
 
-    // 2. View Accounts (Customer)
+    // 2. View Accounts (Customer Desk)
     @GetMapping("/my-accounts")
     public String viewCustomerAccounts(HttpSession session, Model model) {
         Customer customer = (Customer) session.getAttribute("loggedInUser");
@@ -83,7 +82,7 @@ public class AccountController {
         return "customer/accounts";
     }
 
-    // 3. Teller Operations (Unified Deposit & Withdraw)
+    // 3. Teller Operations (Deposit & Withdrawal Page)
     @GetMapping("/operations")
     public String showTellerOperations(HttpSession session) {
         if (!"EMPLOYEE".equals(session.getAttribute("userRole"))) {
@@ -131,7 +130,7 @@ public class AccountController {
         return "account/account-operations";
     }
 
-    // 4. Fund Transfers
+    // 4. Fund Transfers (Customer Desk)
     @GetMapping("/transfer")
     public String showTransferPage(HttpSession session, Model model) {
         Customer customer = (Customer) session.getAttribute("loggedInUser");
